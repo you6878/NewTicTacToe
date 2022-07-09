@@ -1,5 +1,6 @@
 package com.example.newtictactoe.model;
 
+
 import static com.example.newtictactoe.model.Player.O;
 import static com.example.newtictactoe.model.Player.X;
 
