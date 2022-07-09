@@ -1,4 +1,4 @@
-package com.example.newtictactoe.controller;
+package com.example.newtictactoe.view;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -13,18 +13,18 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.newtictactoe.R;
-import com.example.newtictactoe.model.Board;
-import com.example.newtictactoe.model.Player;
+import com.example.newtictactoe.presenter.TicTacToePresenter;
 
-public class TicTacToeActivity extends AppCompatActivity {
+
+public class TicTacToeActivity extends AppCompatActivity implements TicTacToeView {
 
     private static String TAG = TicTacToeActivity.class.getName();
-
-    private Board model;
 
     private ViewGroup buttonGrid;
     private View winnerPlayerViewGroup;
     private TextView winnerPlayerLabel;
+
+    TicTacToePresenter presenter = new TicTacToePresenter(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +33,25 @@ public class TicTacToeActivity extends AppCompatActivity {
         winnerPlayerLabel = (TextView) findViewById(R.id.winnerPlayerLabel);
         winnerPlayerViewGroup = findViewById(R.id.winnerPlayerViewGroup);
         buttonGrid = (ViewGroup) findViewById(R.id.buttonGrid);
+        presenter.onCreate();
+    }
 
-        model = new Board();
+    @Override
+    protected void onPause() {
+        super.onPause();
+        presenter.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        presenter.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter.onDestroy();
     }
 
     @Override
@@ -47,7 +64,7 @@ public class TicTacToeActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_reset:
-                reset();
+                presenter.onResetSelected();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -57,33 +74,36 @@ public class TicTacToeActivity extends AppCompatActivity {
     public void onCellClicked(View v) {
 
         Button button = (Button) v;
-
         String tag = button.getTag().toString();
         int row = Integer.valueOf(tag.substring(0,1));
         int col = Integer.valueOf(tag.substring(1,2));
         Log.i(TAG, "Click Row: [" + row + "," + col + "]");
 
-        Player playerThatMoved = model.mark(row, col);
-
-        if(playerThatMoved != null) {
-            button.setText(playerThatMoved.toString());
-            if (model.getWinner() != null) {
-                winnerPlayerLabel.setText(playerThatMoved.toString());
-                winnerPlayerViewGroup.setVisibility(View.VISIBLE);
-            }
-        }
+        presenter.onButtonSelected(row, col);
 
     }
 
-    private void reset() {
-        winnerPlayerViewGroup.setVisibility(View.GONE);
-        winnerPlayerLabel.setText("");
+    @Override
+    public void setButtonText(int row, int col, String text) {
+        Button btn = (Button) buttonGrid.findViewWithTag("" + row + col);
+        if(btn != null) {
+            btn.setText(text);
+        }
+    }
 
-        model.restart();
-
+    public void clearButtons() {
         for( int i = 0; i < buttonGrid.getChildCount(); i++ ) {
             ((Button) buttonGrid.getChildAt(i)).setText("");
         }
     }
 
+    public void showWinner(String winningPlayerDisplayLabel) {
+        winnerPlayerLabel.setText(winningPlayerDisplayLabel);
+        winnerPlayerViewGroup.setVisibility(View.VISIBLE);
+    }
+
+    public void clearWinnerDisplay() {
+        winnerPlayerViewGroup.setVisibility(View.GONE);
+        winnerPlayerLabel.setText("");
+    }
 }
