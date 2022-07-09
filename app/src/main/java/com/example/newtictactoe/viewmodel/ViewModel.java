@@ -1,7 +1,6 @@
-package com.example.newtictactoe.presenter;
+package com.example.newtictactoe.viewmodel;
 
-
-public interface Presenter {
+public interface ViewModel {
 
     void onCreate();
     void onPause();
